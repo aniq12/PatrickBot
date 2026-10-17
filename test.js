@@ -79,5 +79,12 @@ await conn.sendButton('1203@g.us', 'Judul video', 'wm', webp, [['Audio', '.yta x
 const header = relayed.documentWithCaptionMessage.message.interactiveMessage.header
 assert.equal(header.imageMessage.mimetype, 'image/jpeg')
 console.log('Button image headers OK')
+
+// prototype helpers: ES modules are strict, so (10).getRandom() gets the primitive 10 as `this`
+const { protoType } = await import('./lib/simple.js')
+protoType()
+assert.ok(Number.isInteger((10).getRandom()), 'number getRandom')
+assert.ok('ab'.includes('ab'.getRandom()), 'string getRandom')
+console.log('getRandom OK')
 conn.end(undefined)
 process.exit(0)
