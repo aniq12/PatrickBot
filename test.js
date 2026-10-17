@@ -68,5 +68,16 @@ assert.equal(m.isBaileys, false, 'the user reply itself is not a bot message')
 m = reply('3EB0BBBBBBBBBBBBBBBBBB', '62811@s.whatsapp.net')
 assert.ok(!m.quoted.isBaileys && !m.quoted.fromMe, 'reply to someone else is not a bot message')
 console.log('Quoted bot questions OK')
+
+// button image headers must be jpeg/png: WhatsApp shows "unsupported version" for webp (YouTube thumbnails are webp)
+conn.user = { ...conn.user, id: '62800:5@s.whatsapp.net' }
+conn.waUploadToServer = async () => ({ mediaUrl: 'https://mmg.whatsapp.net/x', directPath: '/x' }) // offline: no upload
+let relayed
+conn.relayMessage = async (jid, message, { messageId }) => (relayed = message, messageId)
+const webp = await (await import('sharp')).default({ create: { width: 64, height: 64, channels: 3, background: '#f00' } }).webp().toBuffer()
+await conn.sendButton('1203@g.us', 'Judul video', 'wm', webp, [['Audio', '.yta x']])
+const header = relayed.documentWithCaptionMessage.message.interactiveMessage.header
+assert.equal(header.imageMessage.mimetype, 'image/jpeg')
+console.log('Button image headers OK')
 conn.end(undefined)
 process.exit(0)
