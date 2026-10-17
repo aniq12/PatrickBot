@@ -1,0 +1,16 @@
+node_modules/
+
+# runtime data: WhatsApp login, user database, scratch files
+sessions/
+database.json
+*_database.json
+tmp/
+
+# secrets
+.env
+cookies.txt
+
+# local tooling
+graphify-out/
+.claude/
+CLAUDE.md
