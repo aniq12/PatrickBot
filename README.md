@@ -100,6 +100,21 @@ When you run `node main.js` directly in a terminal with no number set, it also a
 | `--pconly` / `--gconly` | Only answer in private chats / in groups. |
 | `--debug` | Verbose Baileys logs. |
 
+### Deploying on Railway
+
+The included `Dockerfile` installs Node.js, ffmpeg, ImageMagick and yt-dlp, and starts the bot with `--mongo`.
+
+1. New project → Deploy from GitHub repo. Railway finds the `Dockerfile` by itself.
+2. Service → Variables: add `OWNER_NUMBERS`, `MONGODB_URI` and `PAIRING_NUMBER`, plus `OWNER_NAME`, `DONATION` and `GROUP_LINK` if you use them. Railway doesn't read `.env`.
+3. Service → right-click → Attach volume, mount path **`/app/sessions`**. Without it the WhatsApp login is lost on every redeploy.
+4. Deploy, open the deploy logs, and enter the pairing code on your phone.
+
+Keep it at one replica. Two copies of the bot on the same login knock each other offline. If the same number is also linked to the bot on another machine, stop that one, or every command gets answered twice.
+
+For Instagram, add a variable `YTDLP_COOKIES` with the full contents of your `cookies.txt`.
+
+YouTube often blocks downloads from cloud servers. If `ytmp3`/`ytmp4` fail on Railway with "Sign in to confirm you're not a bot", export YouTube cookies too, into the same `cookies.txt` (one file can hold both sites).
+
 ### Instagram
 
 Instagram only serves posts to logged-in users. Log in to a **spare** Instagram account in your browser, export its cookies in Netscape format (e.g. with the *Get cookies.txt LOCALLY* extension) and save the file as `cookies.txt` in the project folder. It is picked up automatically and is git-ignored. Anyone with that file can use the account, so don't use your main one.

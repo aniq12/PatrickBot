@@ -1,0 +1,12 @@
+node_modules
+.git
+.github
+sessions
+database.json
+*_database.json
+tmp
+.env
+cookies.txt
+graphify-out
+.claude
+CLAUDE.md
