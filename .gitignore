@@ -14,3 +14,7 @@ cookies.txt
 graphify-out/
 .claude/
 CLAUDE.md
+
+# archives 
+*.tar.gz
+*.zip

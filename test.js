@@ -52,5 +52,21 @@ assert.equal(m.chat, '62822@s.whatsapp.net')
 assert.equal(conn.decodeJid('11100:5@lid'), '62800@s.whatsapp.net')
 assert.equal(conn.decodeJid('62811:3@s.whatsapp.net'), '62811@s.whatsapp.net')
 console.log('LID normalization OK')
+
+// quiz answers: a reply to the bot's button question (sendNativeFlow wraps it in documentWithCaptionMessage)
+const question = '3EB0AAAAAAAAAAAAAAAAAA' // v7 ids look like WhatsApp Web's: only the sent-id list tells them apart
+conn.sentIds.add(question)
+const reply = (stanzaId, participant) => smsg(conn, {
+    key: { remoteJid: '1203@g.us', id: 'R' + stanzaId, participant: '62811@s.whatsapp.net' },
+    message: { extendedTextMessage: { text: 'kucing', contextInfo: { stanzaId, participant, quotedMessage: { documentWithCaptionMessage: { message: { interactiveMessage: { body: { text: 'Timeout 120 detik\nKetik .hint untuk bantuan' } } } } } } } }
+})
+m = reply(question, '11100@lid')
+assert.ok(m.quoted.isBaileys && m.quoted.fromMe, 'reply to bot question is recognized')
+assert.match(m.quoted.contentText, /Ketik.*hint/i)
+assert.equal(m.quoted.mtype, 'interactiveMessage')
+assert.equal(m.isBaileys, false, 'the user reply itself is not a bot message')
+m = reply('3EB0BBBBBBBBBBBBBBBBBB', '62811@s.whatsapp.net')
+assert.ok(!m.quoted.isBaileys && !m.quoted.fromMe, 'reply to someone else is not a bot message')
+console.log('Quoted bot questions OK')
 conn.end(undefined)
 process.exit(0)
