@@ -64,6 +64,7 @@ cp .env.example .env     # then edit .env
 | `MONGODB_URI` | Only when you start with `--mongo`. |
 | `PAIRING_NUMBER` | Optional: log in with a pairing code instead of a QR code. |
 | `DONATION` | Optional: what `.donasi` shows, one item per `\|`. |
+| `GROUP_LINK` | Optional: invite link of the bot's group, sent by `.linkgcbot`. |
 
 ## Running
 

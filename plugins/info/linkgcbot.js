@@ -1,10 +1,8 @@
-let handler = async (m, { conn }) => conn.reply(m.chat, `https://chat.whatsapp.com/CW0UnHrX5SWBnqlfZAd4sO`, m, {
-    contextInfo: {
-        externalAdRepy: {
-            suorceUrl: 'https://chat.whatsapp.com/CW0UnHrX5SWBnqlfZAd4sO'
-        }
-    }
-});
+// the bot's group invite link comes from GROUP_LINK in .env
+let handler = async (m, { conn }) => {
+    if (!process.env.GROUP_LINK) throw 'Link grup bot belum diatur (GROUP_LINK di .env)'
+    await conn.reply(m.chat, process.env.GROUP_LINK, m)
+}
 
 handler.help = ['linkgcbot']
 handler.tags = ['info']
