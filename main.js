@@ -151,11 +151,17 @@ async function connectionUpdate(update) {
     }
   }
   const code = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode
+  if (connection === 'open') conn.logger.info(`Connected as ${conn.user?.name || ''} (${conn.decodeJid(conn.user?.id) || '?'})`)
+  if (connection === 'close') {
+    const reason = Object.keys(DisconnectReason).find(k => DisconnectReason[k] === code) || code || 'unknown'
+    if (code === DisconnectReason.loggedOut) conn.logger.error(`Logged out by WhatsApp: delete sessions/ and link the bot again`)
+    else if (code === DisconnectReason.connectionReplaced) conn.logger.warn('Disconnected: another copy of this bot logged in with the same session. Run only one.')
+    else conn.logger.warn(`Disconnected (${reason}), reconnecting...`)
+  }
   if (code && code !== DisconnectReason.loggedOut && !conn?.ws.isConnecting) {
-    console.log(await global.reloadHandler(true).catch(console.error))
+    await global.reloadHandler(true).catch(console.error)
     global.timestamp.connect = new Date
   }
-  console.log(JSON.stringify(update, null, 4))
   if (global.db.data == null) loadDatabase()
 }
 
@@ -212,7 +218,7 @@ async function filesInit() {
     }
   }
 }
-filesInit().then(_ => console.log(Object.keys(global.plugins))).catch(console.error)
+filesInit().then(_ => conn.logger.info(`Loaded ${Object.keys(global.plugins).length} plugins`)).catch(console.error)
 
 global.reload = async (_ev, relPath) => {
   if (pluginFilter(relPath)) {
@@ -253,7 +259,7 @@ async function _quickTest() {
     spawn('convert'),
     spawn('magick'),
     spawn('gm'),
-    spawn('find', ['--version'])
+    spawn('yt-dlp', ['--version'])
   ].map(p => {
     return Promise.race([
       new Promise(resolve => {
@@ -266,8 +272,7 @@ async function _quickTest() {
       })
     ])
   }))
-  let [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test
-  console.log(test)
+  let [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, ytdlp] = test
   let s = global.support = {
     ffmpeg,
     ffprobe,
@@ -275,19 +280,20 @@ async function _quickTest() {
     convert: convert && platform !== 'win32', // on Windows `convert` is the system disk-conversion tool, not ImageMagick
     magick,
     gm,
-    find
+    ytdlp
   }
-  // require('./lib/sticker').support = s
   Object.freeze(global.support)
 
-  if (!s.ffmpeg) conn.logger.warn('Please install ffmpeg for sending videos (pkg install ffmpeg)')
-  if (s.ffmpeg && !s.ffmpegWebp) conn.logger.warn('Stickers may not animated without libwebp on ffmpeg (--enable-ibwebp while compiling ffmpeg)')
-  if (!s.convert && !s.magick && !s.gm) conn.logger.warn('Stickers may not work without imagemagick if libwebp on ffmpeg doesnt isntalled (pkg install imagemagick)')
+  const mark = ok => ok ? '✓' : '✗'
+  const imagemagick = s.magick ? 'magick' : s.convert ? 'convert' : s.gm ? 'gm' : ''
+  conn.logger.info(`Tools: ffmpeg ${mark(s.ffmpeg)}  webp ${mark(s.ffmpegWebp)}  imagemagick ${imagemagick ? `✓ (${imagemagick})` : '✗'}  yt-dlp ${mark(s.ytdlp)}`)
+  if (!s.ffmpeg) conn.logger.warn('ffmpeg not found: stickers and audio/video conversion won\'t work')
+  if (s.ffmpeg && !s.ffmpegWebp) conn.logger.warn('ffmpeg has no WebP support: animated stickers won\'t work')
+  if (!imagemagick) conn.logger.warn('ImageMagick not found: ttp, attp, stikermeme, nulis and level-up cards won\'t work')
+  if (!s.ytdlp) conn.logger.warn('yt-dlp not found: YouTube, Facebook and Instagram downloads won\'t work')
 }
 
-_quickTest()
-  .then(() => conn.logger.info('Quick Test Done'))
-  .catch(console.error)
+_quickTest().catch(console.error)
 
 export {
   clearTmp,
