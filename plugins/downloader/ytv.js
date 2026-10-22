@@ -1,4 +1,4 @@
-let limit = 30, premLimit = 2000
+let limit = 30, premLimit = 2000, documentOver = 100 // WhatsApp only plays videos up to ~100 MB in chat
 import { promises as fs } from 'fs'
 import { ytdlp } from '../../lib/ytdlp.js'
 let handler = async (m, { conn, args, isPrems, isOwner }) => {
@@ -9,15 +9,14 @@ let handler = async (m, { conn, args, isPrems, isOwner }) => {
   let res = parseInt(args.slice(1).find(a => /^\d{3,4}p?$/i.test(a))) || 720
   await m.reply(wait)
   // premium: up to WhatsApp's 2 GB document limit; kept on disk and streamed, not loaded into memory
-  const { path, size, title, height, thumbnail } = await ytdlp(args[0], { maxSize: isPrems || isOwner ? premLimit : limit, height: res, keepFile: true })
+  const { path, size, title, height, thumbnail } = await ytdlp(args[0], { maxSize: isPrems || isOwner ? premLimit : limit, height: res, keepFile: true, documentOver })
   try {
     const caption = `
 📌 *Title:* ${title}
-${height ? `📺 *Resolusi:* ${height}p\n` : ''}🗎 *Filesize:* ${(size / 1024 / 1024).toFixed(1)} MB
+${height ? `📺 *Resolusi:* ${height}p${height < res ? ` (${res}p tidak tersedia/terlalu besar)` : ''}\n` : ''}🗎 *Filesize:* ${(size / 1024 / 1024).toFixed(1)} MB
 `.trim()
     if (!isY && thumbnail) await conn.sendFile(m.chat, thumbnail, 'thumbnail.jpg', caption, m)
-    // WhatsApp only plays videos up to ~100 MB in chat; bigger ones go through as a document
-    const asDocument = chat.useDocument || size > 100 * 1024 * 1024
+    const asDocument = chat.useDocument || size > documentOver * 1024 * 1024
     await conn.sendMessage(m.chat, { [asDocument ? 'document' : 'video']: { url: path }, mimetype: 'video/mp4', fileName: title + '.mp4', caption }, { quoted: m })
   } finally {
     await fs.unlink(path).catch(() => { })
