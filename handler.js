@@ -41,6 +41,7 @@ export async function handler(chatUpdate) {
         m = smsg(this, m) || m
         if (!m)
             return
+        await this.resolveMentions(m)
         m.exp = 0
         m.limit = false
         try {
