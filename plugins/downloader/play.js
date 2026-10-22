@@ -12,7 +12,7 @@ let handler = async (m, { conn, command, text, usedPrefix }) => {
 *Published:* ${publishedTime}
 *Duration:* ${durationH}
 *Views:* ${viewH}
-  `.trim(), wm, await (await fetch(thumbnail)).buffer(), [['Audio', `${usedPrefix}yta ${url} yes`], ['Video', `${usedPrefix}ytv ${url} yes`]])
+  `.trim(), wm, await (await fetch(thumbnail)).buffer(), [['Audio', `${usedPrefix}yta ${url} yes`], ...[360, 480, 720, 1080].map(h => [`Video ${h}p`, `${usedPrefix}ytv ${url} yes ${h}`])])
 }
 handler.help = ['play', 'play2'].map(v => v + ' <pencarian>')
 handler.tags = ['downloader']

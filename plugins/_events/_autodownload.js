@@ -43,7 +43,7 @@ export async function all(m, { isPrems }) {
 ⏲️ *Published:* ${publishedTime}
 ⌚ *Duration:* ${durationH}
 👁️ *Views:* ${viewH}
-  `.trim(), wm, await (await fetch(thumbnail)).buffer(), [['Audio 🎧', `/yta ${link} yes`], ['Video 🎥', `/ytv ${link} yes`]], m)
+  `.trim(), wm, await (await fetch(thumbnail)).buffer(), [['Audio 🎧', `/yta ${link} yes`], ...[360, 480, 720, 1080].map(h => [`Video ${h}p 🎥`, `/ytv ${link} yes ${h}`])], m)
     }
 
 }
