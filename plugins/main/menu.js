@@ -160,19 +160,20 @@ let handler = async (m, { conn, usedPrefix: _p, args, __dirname }) => {
       }
     })
     if (teks == '404') {
-      // List picker (native flow single_select). Tapping a row sends its id back as a command (plugins/_templateResponse.js).
+      // List picker. Tapping a row sends its rowId back as a command (plugins/_templateResponse.js).
       const rows = [
         ['Semua Perintah', 'all'], ['Game', 'game'], ['XP', 'xp'], ['Stiker', 'stiker'], ['Kerang Ajaib', 'kerangajaib'],
         ['Quotes', 'quotes'], ['Admin', 'admin'], ['Grup', 'grup'], ['Premium', 'premium'], ['Internet', 'internet'],
         ['Nulis & Logo', 'nulis'], ['Downloader', 'downloader'], ['Tools', 'tools'], ['Fun', 'fun'],
         ['Jadian', 'jadian'], ['Database', 'database'], ['Vote & Absen', 'vote'], ['Al-Qur\'an', 'quran'],
         ['Pengubah Suara', 'audio'], ['Info', 'info'], ['Tanpa Kategori', 'tanpakategori'], ['Owner', 'owner']
-      ].map(([title, cat]) => ({ title, id: `${_p}? ${cat}` }))
-      return await conn.sendNativeFlow(m.chat, {
+      ].map(([title, cat]) => ({ title, rowId: `${_p}? ${cat}` }))
+      return await conn.sendList(m.chat, {
         title: 'Daftar Perintah PatrickBot',
         text: `Halo ${name}, pilih kategori menu di bawah.\n\n_Tombol tidak muncul? Ketik_ *${_p}menu all*`,
         footer: wm,
-        buttons: [{ name: 'single_select', buttonParamsJson: JSON.stringify({ title: 'Click Here', sections: [{ title: 'Kategori', rows }] }) }]
+        buttonText: 'Click Here',
+        sections: [{ title: 'Kategori', rows }]
       }, m)
     }
     let groups = {}
